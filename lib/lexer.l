@@ -5,11 +5,18 @@ IDS  [a-zA-Z$_]|"\u"[a-fA-F0-9]{4}
 BSL  "\\".
 RCLASS "["({BSL}|[^\\\]])*"]"
 
-%s regex
+%s regex infix_decl
+%x infix_op
 
 %options flex
 
 %%
+
+<infix_op>[^)\s\n]*                    this.addMatcher(opRegex(yytext), ['INITIAL']); return 'INFIX_OP'
+<infix_op>")"                          this.begin('INITIAL'); return ')'
+
+<infix_decl>"("                        this.begin('infix_op'); return '('
+<infix_decl>"`"{IDS}+"`"               this.begin('INITIAL'); return 'INFIX_FN'
 
 ";"\s+/("++"|"--")      return ';'
 \n(\s|\n)*/("++"|"--")  return ';'
@@ -129,8 +136,13 @@ RCLASS "["({BSL}|[^\\\]])*"]"
 "true"                  return 'TRUETOKEN'
 "false"                 return 'FALSETOKEN'
 "null"                  return 'NULLTOKEN'
-({IDS})+({IDS}|[0-9])*  return 'IDENT';
+"infixl"                this.begin("infix_decl"); return 'INFIXL'
+"`"{IDS}+"`"            return yy.replaceToken(yytext)
+{IDS}+({IDS}|[0-9])*    return 'IDENT';
 .                       return 'INVALID'
 
 %%
 
+function opRegex (op) {
+  return new RegExp('^'+op.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1"));
+}

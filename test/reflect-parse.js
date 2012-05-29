@@ -569,7 +569,6 @@ try {
     assertGlobalExpr(src, patt);
     assertBlockExpr(src, patt);
 } catch (e) {
-    console.log(src)
     throw e;
     }
 }
@@ -587,7 +586,6 @@ function assertError(src, errorType) {
         if (expected instanceof errorType) {
             return;
         }
-        console.log(expected)
     }
     throw new Error("expected " + errorType.name + " for " + String(src));
 }

@@ -17,6 +17,9 @@
     "url": "http://github.com/zaach/reflect.js/issues"
   },
   "main": "dist/reflect.js",
+  "bin": {
+    "reflect-ops": "dist/cli.js"
+  },
   "engines": {
     "node": "0.4 || 0.5"
   },

@@ -1,6 +1,6 @@
-all: build test
+all: build move test
 
-build: move
+build:
 	jison lib/grammar.y lib/lexer.l
 	mv grammar.js dist/parser.js
 

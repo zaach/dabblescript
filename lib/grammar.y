@@ -1108,3 +1108,155 @@ SourceElement
     | ConstStatement
     | Statement
     ;
+
+/* infix rules */
+
+SourceElements
+    : InfixDeclaration
+      { $$ = []; }
+    | SourceElements InfixDeclaration
+      { $$ = $1; }
+    ;
+
+SourceElement
+    : OperatorDeclaration
+    ;
+
+MemberExpr
+    : MemberExpr INFIXL_DOT PrimaryExpr
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    | MemberExpr INFIXL_DOT FunctionExpr
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+MultiplicativeExpr
+    : MultiplicativeExpr INFIXL_MULT UnaryExpr
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+AdditiveExpr
+    : AdditiveExpr INFIXL_PLUS MultiplicativeExpr
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+ShiftExpr
+    : ShiftExpr INFIXL_SHIFT AdditiveExpr
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+RelationalExpr
+    : RelationalExpr INFIXL_REL ShiftExpr
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+EqualityExpr
+    : EqualityExpr INFIXL_EQ RelationalExpr
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+BitwiseANDExpr
+    : BitwiseANDExpr INFIXL_BAND EqualityExpr
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+BitwiseXORExpr
+    : BitwiseXORExpr INFIXL_BXOR BitwiseANDExpr
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+BitwiseORExpr
+    : BitwiseORExpr INFIXL_BOR BitwiseXORExpr
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+LogicalANDExpr
+    : LogicalANDExpr INFIXL_AND BitwiseORExpr
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+LogicalORExpr
+    : LogicalORExpr INFIXL_OR LogicalANDExpr
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+Expr
+    : Expr INFIXL_COMMA AssignmentExpr
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+InfixDeclaration
+      /* e.g. infixl : * `elem`; */
+    : INFIXL OpPrecedence INFIX_FN ';'
+      { yy.setInfix($3, $3.substr(1,$3.length-2), $2, 'L'); }
+    /*| INFIXR ':' InfixOp INFIX_FN*/
+      /*{ yy.setInfix($4, $4, $3, 'R'); }*/
+    | INFIXL OpPrecedence '(' INFIX_OP ')' '=' IDENT ';'
+      { yy.setInfix($4, $7, $2, 'L'); }
+    ;
+
+OperatorDeclaration
+      /* e.g. infixl : * (**) = exponentiation; */
+    : INFIXL OpPrecedence '(' INFIX_OP ')' '=' OperatorDefinition ';'
+      {
+        var funLabel = '$'+'infixop'+opLabels++;
+        yy.setInfix($4, funLabel, $2, 'L');
+        $$ = yy.Node('VariableDeclaration', "var",
+                [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
+                yy.loc([@1,@8]));
+      }
+    ;
+
+OperatorDefinition
+    : FunctionOpt '(' ')' Block
+      { $$ = yy.Node('FunctionExpression', null, [], $Block, false, false, yy.loc([@$,@4])); }
+    | FunctionOpt '(' FormalParameterList ')' Block
+      { $$ = yy.Node('FunctionExpression', null,
+           $FormalParameterList, $Block, false, false, yy.loc([@$,@5])); }
+    ;
+
+FunctionOpt
+    : FUNCTION
+    |
+    ;
+
+OpPrecedence
+    : InfixOp
+    | NUMBER
+    ;
+
+
+InfixOp
+    : ','
+    | OR
+    | AND
+    | '|'
+    | '^'
+    | URSHIFT
+    | LSHIFT
+    | RSHIFT
+    | '+'
+    | '-'
+    | '*'
+    | '%'
+    | '<'
+    | '<<'
+    | '<='
+    | '>'
+    | '>='
+    | '>>'
+    | '>>>'
+    | '&'
+    | '/'
+    | '=='
+    | '!='
+    | '==='
+    | '!=='
+    | '.'
+    ;
+
+%%
+
+var opLabels = 0;
+
+var opStack = [];
+var opStackPointer = 0;
