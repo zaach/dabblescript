@@ -5,17 +5,25 @@ IDS  [a-zA-Z$_]|"\u"[a-fA-F0-9]{4}
 BSL  "\\".
 RCLASS "["({BSL}|[^\\\]])*"]"
 
-%s regex infix_decl
-%x infix_op
+%s regex infix_decl postfix_decl prefix_decl
+%x op deleteop
 
 %options flex
 
 %%
 
-<infix_op>[^)\s\n]*                    this.addMatcher(opRegex(yytext), ['INITIAL']); return 'INFIX_OP'
-<infix_op>")"                          this.begin('INITIAL'); return ')'
+<deleteop>\s*                          /* ignore */
+<deleteop>[^;\s\n]*                    return 'OPERATOR'
+<deleteop>";"                          this.begin('INITIAL'); return ';'
 
-<infix_decl>"("                        this.begin('infix_op'); return '('
+<op>[^)\s\n]*                          return 'OPERATOR'
+<op>")"                                this.begin('INITIAL'); return ')'
+
+<postfix_decl>"("                      this.begin('op'); return '('
+
+<prefix_decl>"("                       this.begin('op'); return '('
+
+<infix_decl>"("                        this.begin('op'); return '('
 <infix_decl>"`"{IDS}+"`"               this.begin('INITIAL'); return 'INFIX_FN'
 
 ";"\s+/("++"|"--")      return ';'
@@ -137,12 +145,12 @@ RCLASS "["({BSL}|[^\\\]])*"]"
 "false"                 return 'FALSETOKEN'
 "null"                  return 'NULLTOKEN'
 "infixl"                this.begin("infix_decl"); return 'INFIXL'
+"postfix"               this.begin("postfix_decl"); return 'POSTFIX'
+"prefix"                this.begin("prefix_decl"); return 'PREFIX'
+"deleteop"              this.begin("deleteop"); return 'DELETEOP'
 "`"{IDS}+"`"            return yy.replaceToken(yytext)
 {IDS}+({IDS}|[0-9])*    return 'IDENT';
 .                       return 'INVALID'
 
 %%
 
-function opRegex (op) {
-  return new RegExp('^'+op.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1"));
-}

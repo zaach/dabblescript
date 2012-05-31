@@ -36,3 +36,44 @@ infixl 8 (::) = concat3;
 
 var d = [1,2] :: [3,4];
 assert.deepEqual(d, [1,2,3,4]);
+
+// test deleting an operation
+deleteop <<;
+assert.equal( 1 << 2, 4);
+
+var fn = function (hmm) {
+  infixl 9 (+) = function (a, b) {
+    return a*b;
+  };
+
+  assert.equal(1 + 2, 2);
+};
+
+assert.equal(1 + 2, 3);
+
+// range inclusive operator
+infixl 8 (..) = (a, b) {
+    var array = [];
+    for (;a <= b; a++) {
+        array.push(a);
+    }
+    return array;
+};
+
+assert.deepEqual(1..4, [1,2,3,4]);
+
+
+// test postfix operators
+postfix (?) = function (a) {
+  return !!a;
+};
+
+assert.strictEqual(''?, false);
+
+// test prefix operators
+prefix (@) = function (a) {
+  return Date.parse(a);
+};
+
+assert.equal(@"December 28, 1995", 820137600000);
+

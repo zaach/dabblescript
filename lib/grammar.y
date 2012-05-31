@@ -1043,32 +1043,47 @@ DebuggerStatement
     ;
 
 FunctionDeclaration
-    : FUNCTION IDENT '(' ')' Block
+    : FunctionScope IDENT '(' ')' Block
       { $$ = yy.Node('FunctionDeclaration',
                 yy.Node('Identifier', $2,yy.loc(@2)), [], $Block, false, false, yy.loc([@$,@5]))
+        leaveScope(yy);
       }
-    | FUNCTION IDENT '(' FormalParameterList ')' Block
+    | FunctionScope IDENT '(' FormalParameterList ')' Block
       { $$ = yy.Node('FunctionDeclaration',
                 yy.Node('Identifier', $2,yy.loc(@2)),
                 $FormalParameterList, $Block, false, false, yy.loc([@$,@6]))
+        leaveScope(yy);
       }
     ;
 
 FunctionExpr
-    : FUNCTION '(' ')' Block
-      { $$ = yy.Node('FunctionExpression', null, [], $Block, false, false, yy.loc([@$,@4])); }
-    | FUNCTION '(' FormalParameterList ')' Block
+    : FunctionScope '(' ')' Block
+      { $$ = yy.Node('FunctionExpression', null, [], $Block, false, false, yy.loc([@$,@4]));
+        leaveScope(yy);
+      }
+    | FunctionScope '(' FormalParameterList ')' Block
       { $$ = yy.Node('FunctionExpression', null,
-           $FormalParameterList, $Block, false, false, yy.loc([@$,@5])); }
+           $FormalParameterList, $Block, false, false, yy.loc([@$,@5])); 
+        leaveScope(yy);
+      }
 
-    | FUNCTION IDENT '(' ')' Block
+    | FunctionScope IDENT '(' ')' Block
       { $$ = yy.Node('FunctionExpression',
                 yy.Node('Identifier', $2,yy.loc(@2)),
-                [], $Block, false, false, yy.loc([@$,@5])); }
-    | FUNCTION IDENT '(' FormalParameterList ')' Block
+                [], $Block, false, false, yy.loc([@$,@5]));
+        leaveScope(yy);
+      }
+    | FunctionScope IDENT '(' FormalParameterList ')' Block
       { $$ = yy.Node('FunctionExpression',
                 yy.Node('Identifier', $2,yy.loc(@2)),
-                $FormalParameterList, $Block, false, false, yy.loc([@$,@6])); }
+                $FormalParameterList, $Block, false, false, yy.loc([@$,@6]));
+        leaveScope(yy);
+      }
+    ;
+
+FunctionScope
+    : FUNCTION
+      { $$ = $1; enterScope(); }
     ;
 
 FormalParameterList
@@ -1100,7 +1115,7 @@ SourceElements
       { $$ = [$1]; }
     | SourceElements SourceElement
       { yy.locComb(@$,@2);
-      $$ = $1;$1.push($2); }
+        $$ = $1;$1.push($2); }
     ;
 
 SourceElement
@@ -1127,6 +1142,16 @@ MemberExpr
       { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
     | MemberExpr INFIXL_DOT FunctionExpr
       { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    ;
+
+PostfixExpr
+    : LeftHandSideExpr POSTFIX_OP
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1],yy.loc([@$,@2])); }
+    ;
+
+UnaryExprCommon
+    : PREFIX_OP UnaryExpr
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($1),yy.loc(@1)), [$2],yy.loc([@$,@2])); }
     ;
 
 MultiplicativeExpr
@@ -1190,19 +1215,44 @@ InfixDeclaration
       { yy.setInfix($3, $3.substr(1,$3.length-2), $2, 'L'); }
     /*| INFIXR ':' InfixOp INFIX_FN*/
       /*{ yy.setInfix($4, $4, $3, 'R'); }*/
-    | INFIXL OpPrecedence '(' INFIX_OP ')' '=' IDENT ';'
-      { yy.setInfix($4, $7, $2, 'L'); }
+    | INFIXL OpPrecedence '(' OPERATOR ')' '=' IDENT ';'
+      { yy.setInfix($4, $7, $2, 'L'); addOp(yy, $4); }
+    | POSTFIX '(' OPERATOR ')' '=' IDENT ';'
+      { yy.setPostPrefix($3, $6, true); addOp(yy, $3); }
+    | PREFIX '(' OPERATOR ')' '=' IDENT ';'
+      { yy.setPostPrefix($3, $6); addOp(yy, $3); }
+    | DELETEOP OPERATOR ';'
+      { deleteOp(yy, $2); }
     ;
 
 OperatorDeclaration
       /* e.g. infixl : * (**) = exponentiation; */
-    : INFIXL OpPrecedence '(' INFIX_OP ')' '=' OperatorDefinition ';'
+    : INFIXL OpPrecedence '(' OPERATOR ')' '=' OperatorDefinition ';'
       {
         var funLabel = '$'+'infixop'+opLabels++;
         yy.setInfix($4, funLabel, $2, 'L');
         $$ = yy.Node('VariableDeclaration', "var",
                 [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
                 yy.loc([@1,@8]));
+        addOp(yy, $4);
+      }
+    | POSTFIX '(' OPERATOR ')' '=' OperatorDefinition ';'
+      {
+        var funLabel = '$'+'postfixop'+opLabels++;
+        yy.setPostPrefix($3, funLabel, true);
+        $$ = yy.Node('VariableDeclaration', "var",
+                [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
+                yy.loc([@1,@7]));
+        addOp(yy, $3);
+      }
+    | PREFIX '(' OPERATOR ')' '=' OperatorDefinition ';'
+      {
+        var funLabel = '$'+'prefixop'+opLabels++;
+        yy.setPostPrefix($3, funLabel);
+        $$ = yy.Node('VariableDeclaration', "var",
+                [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
+                yy.loc([@1,@7]));
+        addOp(yy, $3);
       }
     ;
 
@@ -1258,5 +1308,47 @@ InfixOp
 
 var opLabels = 0;
 
+// store the number of definied operators
+function enterScope () {
+  opPointerStack.push(opPointer);
+}
+
+// pop operators defined since entering scope
+function leaveScope (yy) {
+  var previous = opPointerStack.pop();
+  while (opPointer > previous) {
+    deleteOpAt(yy, opPointer-1);
+  }
+  console.error('leave', opStack, opPointer, opPointerStack);
+}
+
+function addOp (yy, op) {
+  yy.lexer.addMatcher(opRegex(op), ['INITIAL']);
+  opStack.push(op);
+  console.error('add', op, opPointer, opStack);
+  opPointer++;
+}
+
+function deleteOp (yy, op) {
+  if (!yy.operators[op]) return;
+  deleteOpAt(yy, opStack.lastIndexOf(op));
+}
+
+function deleteOpAt (yy, pointer) {
+  // remove rule from lexer
+  yy.lexer.removeMatcher(pointer);
+  // delete entry in ops table
+  delete yy.operators[opStack[pointer]];
+  opStack.splice(pointer, 1);
+  opPointer--;
+
+  console.error('del', pointer, opStack, yy.operators, opPointer);
+}
+
+function opRegex (op) {
+  return new RegExp('^'+op.replace(/([.?*+^$[\]\\(){}|-])/g, "\\$1"));
+}
+
 var opStack = [];
-var opStackPointer = 0;
+var opPointerStack = [];
+var opPointer = 0;
