@@ -6,6 +6,7 @@
 
 var Reflect = require('../dist/reflect').Reflect;
 var Match = require('./match').Match;
+var mozBuilder = require('../dist/reflect').mozBuilder;
 
 var Pattern = Match.Pattern;
 var MatchError = Match.MatchError;
@@ -230,7 +231,7 @@ function tryStmt (body, catches, fin) {
     return Pattern({
         "type": "TryStatement",
         "block": body,
-        "handler": catches,
+        "handlers": catches||[],
         "finalizer": fin
     });
 }
@@ -521,7 +522,7 @@ function xmlCdata (cdata) {
 }
 
 function assertBlockStmt(src, patt) {
-    blockPatt(patt).assert(Reflect.parse(blockSrc(src)));
+    blockPatt(patt).assert(Reflect.parse(blockSrc(src), {builder: mozBuilder}));
 }
 
 function assertBlockExpr(src, patt) {
@@ -529,11 +530,11 @@ function assertBlockExpr(src, patt) {
 }
 
 function assertBlockDecl(src, patt, builder) {
-    blockPatt(patt).assert(Reflect.parse(blockSrc(src), {builder: builder}));
+    blockPatt(patt).assert(Reflect.parse(blockSrc(src), {builder: builder||mozBuilder}));
 }
 
 function assertLocalStmt(src, patt) {
-    localPatt(patt).assert(Reflect.parse(localSrc(src)));
+    localPatt(patt).assert(Reflect.parse(localSrc(src), {builder: mozBuilder}));
 }
 
 function assertLocalExpr(src, patt) {
@@ -541,20 +542,20 @@ function assertLocalExpr(src, patt) {
 }
 
 function assertLocalDecl(src, patt) {
-    localPatt(patt).assert(Reflect.parse(localSrc(src)));
+    localPatt(patt).assert(Reflect.parse(localSrc(src), {builder: mozBuilder}));
 }
 
 function assertGlobalStmt(src, patt, builder) {
-    program([patt]).assert(Reflect.parse(src, {builder: builder}));
+    program([patt]).assert(Reflect.parse(src, {builder: builder||mozBuilder}));
 }
 
 function assertGlobalExpr(src, patt, builder) {
-    program([exprStmt(patt)]).assert(Reflect.parse(src, {builder: builder}));
+    program([exprStmt(patt)]).assert(Reflect.parse(src, {builder: builder||mozBuilder}));
     //assertStmt(src, exprStmt(patt));
 }
 
 function assertGlobalDecl(src, patt) {
-    program([patt]).assert(Reflect.parse(src));
+    program([patt]).assert(Reflect.parse(src, {builder: mozBuilder}));
 }
 
 function assertStmt(src, patt) {
@@ -790,15 +791,15 @@ assertStmt("switch (foo) { case 1: 1; break; case 2: 2; break; default: 3; case 
                         caseClause(lit(42), [ exprStmt(lit(42)) ]) ]));
 assertStmt("try { } catch (e) { }",
            tryStmt(blockStmt([]),
-                   catchClause(ident("e"), null, blockStmt([])),
+                   [catchClause(ident("e"), null, blockStmt([]))],
                    null));
 assertStmt("try { } catch (e) { } finally { }",
            tryStmt(blockStmt([]),
-                   catchClause(ident("e"), null, blockStmt([])),
+                   [catchClause(ident("e"), null, blockStmt([]))],
                    blockStmt([])));
 assertStmt("try { } finally { }",
            tryStmt(blockStmt([]),
-                   null,
+                   [],
                    blockStmt([])));
 //assertStmt("try { } catch (e if foo) { } catch (e if bar) { } finally { }",
            //tryStmt(blockStmt([]),
@@ -1309,31 +1310,31 @@ assertExpr("(<x><!-- hello, world --></x>)()", callExpr(xmlElt([xmlStartTag([xml
 
 // Source location information
 
-var withoutFileOrLine = Reflect.parse("42");
-var withFile = Reflect.parse("42", {source:"foo.js"});
-var withFileAndLine = Reflect.parse("42", {source:"foo.js", line:111});
+var withoutFileOrLine = Reflect.parse("42", {builder: mozBuilder});
+var withFile = Reflect.parse("42", {source:"foo.js", builder: mozBuilder});
+var withFileAndLine = Reflect.parse("42", {source:"foo.js", line:111, builder: mozBuilder});
 
 Pattern({ source: null, start: { line: 1, column: 0 }, end: { line: 1, column: 2 } }).match(withoutFileOrLine.loc);
 Pattern({ source: "foo.js", start: { line: 1, column: 0 }, end: { line: 1, column: 2 } }).match(withFile.loc);
 Pattern({ source: "foo.js", start: { line: 111, column: 0 }, end: { line: 111, column: 2 } }).match(withFileAndLine.loc);
 
-var withoutFileOrLine2 = Reflect.parse("foo +\nbar");
-var withFile2 = Reflect.parse("foo +\nbar", {source:"foo.js"});
-var withFileAndLine2 = Reflect.parse("foo +\nbar", {source:"foo.js", line:111});
+var withoutFileOrLine2 = Reflect.parse("foo +\nbar", {builder: mozBuilder});
+var withFile2 = Reflect.parse("foo +\nbar", {source:"foo.js", builder: mozBuilder});
+var withFileAndLine2 = Reflect.parse("foo +\nbar", {source:"foo.js", line:111, builder: mozBuilder});
 
 Pattern({ source: null, start: { line: 1, column: 0 }, end: { line: 2, column: 3 } }).match(withoutFileOrLine2.loc);
 Pattern({ source: "foo.js", start: { line: 1, column: 0 }, end: { line: 2, column: 3 } }).match(withFile2.loc);
 Pattern({ source: "foo.js", start: { line: 111, column: 0 }, end: { line: 112, column: 3 } }).match(withFileAndLine2.loc);
 
-var nested = Reflect.parse("(-b + sqrt(sqr(b) - 4 * a * c)) / (2 * a)", {source:"quad.js"});
+var nested = Reflect.parse("(-b + sqrt(sqr(b) - 4 * a * c)) / (2 * a)", {source:"quad.js", builder: mozBuilder});
 var fourAC = nested.body[0].expression.left.right.arguments[0].right;
 
 Pattern({ source: "quad.js", start: { line: 1, column: 20 }, end: { line: 1, column: 29 } }).match(fourAC.loc);
 
 
 // No source location
-if(Reflect.parse("42", {loc:false}).loc !== null) throw 'not null';
-program([exprStmt(lit(42))]).assert(Reflect.parse("42", {loc:false}));
+if(Reflect.parse("42", {loc:false, builder: mozBuilder}).loc !== null) throw 'not null';
+program([exprStmt(lit(42))]).assert(Reflect.parse("42", {loc:false, builder: mozBuilder}));
 
 
 // Builder tests
@@ -1382,7 +1383,7 @@ assertGlobalExpr("this", 14, { thisExpression: function(){ return 14 }});
 //assertGlobalExpr("(let (x) x)", 20, { letExpression: function(){ return 20 }});
 
 assertGlobalStmt("switch (x) { case y: }", switchStmt(ident("x"), [1]), { switchCase: function(){ return 1 }});
-assertGlobalStmt("try { } catch (e) { }", tryStmt(blockStmt([]), 2, null), { catchClause: function(){ return 2 }});
+assertGlobalStmt("try { } catch (e) { }", tryStmt(blockStmt([]), [2], null), { catchClause: function(){ return 2 }});
 //assertGlobalStmt("try { } catch (e if e instanceof A) { } catch (e if e instanceof B) { }",
                  //tryStmt(blockStmt([]), [2, 2], null),
                  //{ catchClause: function(){ return 2 }});
@@ -1590,7 +1591,7 @@ return {
     tryStatement: function(body, catches, fin) {
         if (catches.length > 1)
             throw new SyntaxError("multiple catch clauses not supported");
-        var node = ["TryStmt", body, catches[0] || ["Empty"]];
+        var node = ["TryStmt", body, catches || ["Empty"]];
         if (fin)
             node.push(fin);
         return node;
