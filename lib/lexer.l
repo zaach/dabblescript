@@ -26,13 +26,13 @@ EIDP [\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\
 <deleteop>";"                          this.begin('INITIAL'); return ';'
 
 <op>[^)\s\n]*                          return 'OPERATOR'
-<op>")"                                this.begin('INITIAL'); return ')'
+<op>\s*")"                             this.begin('INITIAL'); return ')'
 
 <postfix_decl>"("                      this.begin('op'); return '('
 
 <prefix_decl>"("                       this.begin('op'); return '('
 
-<infix_decl>"("                        this.begin('op'); return '('
+<infix_decl>"("\s*                     this.begin('op'); return '('
 <infix_decl>"`"{IDS}+"`"               this.begin('INITIAL'); return 'INFIX_FN'
 
 ";"\s+/("++"|"--")      return ';'
@@ -198,6 +198,7 @@ EIDP [\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\
 "false"                  yy.ASI = false;                           return 'FALSETOKEN'
 "null"                   yy.ASI = false;                           return 'NULLTOKEN'
 "infixl"                                 this.begin("infix_decl"); return 'INFIXL'
+"infixr"                                 this.begin("infix_decl"); return 'INFIXR'
 "postfix"                              this.begin("postfix_decl"); return 'POSTFIX'
 "prefix"                                this.begin("prefix_decl"); return 'PREFIX'
 "deleteop"                                 this.begin("deleteop"); return 'DELETEOP'

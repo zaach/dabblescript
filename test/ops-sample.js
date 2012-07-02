@@ -41,13 +41,13 @@ assert.deepEqual(d, [1,2,3,4]);
 deleteop <<;
 assert.equal( 1 << 2, 4);
 
-var fn = function (hmm) {
+(function (hmm) {
   infixl 9 (+) = function (a, b) {
     return a*b;
   };
 
   assert.equal(1 + 2, 2);
-};
+})();
 
 assert.equal(1 + 2, 3);
 
@@ -77,3 +77,12 @@ prefix (@) = function (a) {
 
 assert.equal(@"December 28, 1995", 820137600000);
 
+// test shadowing operator and right associativity
+(function () {
+  infixr || (@) = function (a, b) {
+    return a(b);
+  };
+  assert.equal(String @ Math.floor @ 3.14, "3");
+})();
+
+assert.equal(@"December 28, 1995", 820137600000);
