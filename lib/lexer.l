@@ -25,7 +25,7 @@ EIDP [\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\
 <deleteop>[^;\s\n]*                    return 'OPERATOR'
 <deleteop>";"                          this.begin('INITIAL'); return ';'
 
-<op>[^)\s\n]*                          return 'OPERATOR'
+<op>("\\\\"|"\\)"|[^)\s\n])*           yytext = yytext.replace(/\\\)/g, ")").replace(/\\\\/g, "\\"); return 'OPERATOR'
 <op>\s*")"                             this.begin('INITIAL'); return ')'
 
 <postfix_decl>"("                      this.begin('op'); return '('

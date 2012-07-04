@@ -52,7 +52,7 @@ assert.equal( 1 << 2, 4);
 assert.equal(1 + 2, 3);
 
 // range inclusive operator
-infixl 8 (..) = (a, b) {
+infixl 8 (..) = function (a, b) {
     var array = [];
     for (;a <= b; a++) {
         array.push(a);
@@ -86,3 +86,11 @@ assert.equal(@"December 28, 1995", 820137600000);
 })();
 
 assert.equal(@"December 28, 1995", 820137600000);
+
+// test escaped paren "\)" and escaped escape "\\"
+infixr 5 (\\-\)) = function (a, b) {
+  return a - b;
+};
+
+assert.equal(5 \-) 4, 1);
+
