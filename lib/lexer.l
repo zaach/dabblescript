@@ -28,12 +28,15 @@ EIDP [\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\
 <op>("\\\\"|"\\)"|[^)\s\n])*           yytext = yytext.replace(/\\\)/g, ")").replace(/\\\\/g, "\\"); return 'OPERATOR'
 <op>\s*")"                             this.begin('INITIAL'); return ')'
 
-<postfix_decl>"("                      this.begin('op'); return '('
+<postfix_decl>"("\s*                   this.begin('op'); return '('
+<postfix_decl>lazy                     return 'LAZY'
 
-<prefix_decl>"("                       this.begin('op'); return '('
+<prefix_decl>"("\s*                    this.begin('op'); return '('
+<prefix_decl>lazy                      return 'LAZY'
 
 <infix_decl>"("\s*                     this.begin('op'); return '('
 <infix_decl>"`"{IDS}+"`"               this.begin('INITIAL'); return 'INFIX_FN'
+<infix_decl>lazy                       return 'LAZY'
 
 ";"\s+/("++"|"--")      return ';'
 \n(\s|\n)*/("++"|"--")  return ';'
@@ -199,6 +202,7 @@ EIDP [\xaa\xb5\xba\xc0-\xd6\xd8-\xf6\xf8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\
 "null"                   yy.ASI = false;                           return 'NULLTOKEN'
 "infixl"                                 this.begin("infix_decl"); return 'INFIXL'
 "infixr"                                 this.begin("infix_decl"); return 'INFIXR'
+"assign"                                 this.begin("infix_decl"); return 'ASSIGN'
 "postfix"                              this.begin("postfix_decl"); return 'POSTFIX'
 "prefix"                                this.begin("prefix_decl"); return 'PREFIX'
 "deleteop"                                 this.begin("deleteop"); return 'DELETEOP'

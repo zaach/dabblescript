@@ -1,46 +1,62 @@
-![Reflect.js](https://github.com/zaach/reflect.js/raw/master/reflectjs.png "Reflect.js")
+# DabbleScript
 
-Reflect.js is a JavaScript (ES3 compatible) implementation of [Mozilla's Parser API](https://developer.mozilla.org/en/SpiderMonkey/Parser_API). It does not currently support some of Mozilla's extensions, such as generators, list comprehensions, `for each`, E4X, etc. but may eventually support ones that are, or become Harmony proposals.
-Builders are also supported.
+Dabble with JavaScript syntax.
 
-Parsing really large files can be slow, for reasons [articulated](http://www.andychu.net/ecmascript/RegExp-Enhancements.html) by Andy Chu.
+    // define an "is" operator
+    infixl 8 (is) = function (a, b) {
+      return a === b;
+    };
+
+    assert.ok("everything" is "everything");
+
+## Install
+
+    $ npm install dabble
+
+Or clone from git and run `make`.
+
+## Use
+
+Translate dabble scripts:
+
+    $ dabble exaple/es-next-operators.dabble
+
+## Operator Declarations
+
+    infixl [lazy] <precedence> (op) = expr;
+
+    infixr [lazy] <precedence> (op) = expr;
+
+    prefix [lazy] (op) = expr;
+
+    postfix [lazy] (op) = expr;
+
+    assign [infixr|prefix|postfix] (op) = expr;
 
 
-Download
-========
-You can download a minified-standalone version of reflect.js to embed in web pages [here](https://raw.github.com/zaach/reflect.js/master/standalone/reflect.js).
+Infix operators can be left or right associative.
 
-Install
-=======
-Reflect.js is available as a CommonJS module for Node.js. Simply install it with npm:
+Assign operators roughly translate as `lhs op val` to `lhs = op(lhs, val)`.
 
-    npm install reflect
+Lazy operators will have their arguments wrapped in thunks. Precedence determines the order of operations (detailed below), and can be a number from 1 - 16 or a builtin operator (to copy that operators precedence).
 
-Use
-=======
+### Infix Precedence
 
-    var Reflect = require('reflect');
+From lowest to highest precedence:
 
-    var ast = Reflect.parse("var a = 4 + 7");
+    1  ,
+    2         // reserved for assignment operators; use assign declaration
+    3  ||
+    4  &&
+    5  |
+    6  ^
+    7  &
+    8  == != === !==
+    9  < <= > >=
+    10 >> >>> <<
+    11 + -
+    12 * % /
+    14        // reserved for unary; use prefix declaration
+    15        // reserved for postfix; use postfix declaration
+    16 .
 
-    console.log(Reflect.stringify(ast, "  "));
-
-Refer to [Mozilla's docs](https://developer.mozilla.org/en/SpiderMonkey/Parser_API) for details on the AST interface.
-
-Builders
-=======
-The optional [builder](https://developer.mozilla.org/en/SpiderMonkey/Parser_API#Builder_objects) parameter to Reflect.parse() makes it possible to construct user-specified data from the parser, rather than the default Node objects.
-
-The reflect.js module exports the [default builder](https://raw.github.com/zaach/reflect.js/master/lib/nodes.js) so you can redefine only the node constructors you care about and leave the rest default.
-
-    var Reflect = require('reflect');
-    var builder = Reflect.builder;
-
-    // redefine callback for variable declarations
-    builder["variableDeclaration"] = function (kind, declarators, loc) { ... };
-
-    var ast = Reflect.parse("var a = 4 + 7", {builder: builder});
-
-License
-=======
-MIT X Licensed.

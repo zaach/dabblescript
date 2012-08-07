@@ -8,8 +8,8 @@ move: lib
 	cp lib/*.js dist/
 
 test: move dist
-	node test/all-tests.js
+	node dist/cli.js test/ops-sample.js | node
 
 standalone: move dist
-	node scripts/standalone.js | uglifyjs > standalone/reflect.js
+	node scripts/standalone.js | uglifyjs > standalone/dabble.js
 

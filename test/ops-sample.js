@@ -69,6 +69,7 @@ postfix (?) = function (a) {
 };
 
 assert.strictEqual(''?, false);
+deleteop ?;
 
 // test prefix operators
 prefix (@) = function (a) {
@@ -94,3 +95,92 @@ infixr 5 (\\-\)) = function (a, b) {
 
 assert.equal(5 \-) 4, 1);
 
+infixl || (.=) = function (a, b) {
+  Object.keys(b).forEach(function(k) { a[k]=b[k] });
+  return a;
+};
+
+assert.deepEqual({}.={foo: 'bar'}.={yes: true}, {foo: 'bar', yes: true});
+
+// test assignment operator
+assign (:=) = function (a, b) {
+  return b;
+};
+
+var test_assign;
+test_assign := 42;
+assert.equal(test_assign, 42);
+
+// test lazy operator
+infixl lazy || (??) = function (a, b) {
+  var val = a();
+  return val !== undefined ? val : b();
+};
+
+var lazy;
+
+assert.equal(lazy ?? 42, 42);
+lazy = 0;
+assert.equal(lazy ?? ++lazy, 0);
+
+// test lazy assignment operator and sections
+assign lazy (??=) = (??);
+
+var val;
+val ??= 42;
+val ??= 99;
+assert.equal(val, 42);
+
+var obj = {};
+obj['blah'] ??= 42;
+obj.power_level ??= 9001;
+obj.power_level ??= 8000;
+assert.equal(obj.blah, 42);
+assert.ok(obj.power_level > 9000);
+
+assign prefix (+++) = function (a) {
+  return a + 2;
+};
+var val2 = 0;
++++val2;
++++obj.power_level;
+
+assert.equal(val2, 2);
+assert.equal(obj.power_level, 9003);
+
+// First, the basics
+// You can overwrite existing operators
+// Let's make the plus operator strongly typed
+infixl + (+) = function (a, b) {
+  if (typeof a !== 'number' || typeof b !== 'number') {
+    throw new Error("TypeError: operands of + must be numbers");
+  }
+  return a + b;
+};
+
+// You can define new operators
+// Now we need an operator for string concatenation
+infixl + (::) = function (a, b) {
+  if (typeof a !== 'string' || typeof b !== 'string') {
+    throw new Error("TypeError: operands of :: must be strings");
+  }
+  return a + b;
+};
+
+// No coersion here!
+// Note: if you overwrite an existing operator as infix, it can no longer be used as pre/postfix (e.g. +obj)
+// You can assign a function to the operator from a module
+// Infix functions for free, using backticks
+// Scoping operator declarations
+// shadowing operators
+// explicitly deleting operators
+//
+// This is where it gets crazy: operators can be valid identifiers. Operators can be anything except whitespace, in fact.
+//
+// But wait, there's more! (oh no...)
+// You can define prefix and postfix operators too.
+//
+// Gotchas
+// If you use a valid identifier as an operator, it cannot hug other valid identifiers.
+// Does not work with eval -- compilation happens statically.
+// Operators can either be prefix, infixl, infixr, or postfix. 

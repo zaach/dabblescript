@@ -1,0 +1,13 @@
+var assert = require('assert');
+
+infixl 8 (is) = function (a, b) {
+  return a === b;
+};
+
+infixl 8 (isnt) = function (a, b) {
+  return a !== b;
+};
+
+assert.ok("everything" is "everything");
+
+assert.ok("everything" isnt "nothing");

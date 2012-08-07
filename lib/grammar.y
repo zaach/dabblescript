@@ -1257,343 +1257,401 @@ ScopeSourceElement
 
 
 MemberExprNoBF
-    : MemberExprNoBF INFIXL_DOT PrimaryExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    : MemberExprNoBF INFIXL_DOT PrimaryExprNoBrace
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | MemberExprNoBF INFIXL_DOT FunctionExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
-    | PrimaryExprNoBF INFIXR_DOT MemberExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
+    | PrimaryExprNoBrace INFIXR_DOT MemberExprNoBF
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | FunctionExprNoBF INFIXR_DOT MemberExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 PostfixExprNoBF
     : LeftHandSideExprNoBF POSTFIX_OP
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1],yy.loc([@$,@2])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1]),yy.loc([@$,@2])); }
     ;
 
 UnaryExprCommonNoBF
     : PREFIX_OP UnaryExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($1),yy.loc(@1)), [$2],yy.loc([@$,@2])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($1),yy.loc(@1)), yy.opArgs($1, [$2]),yy.loc([@$,@2])); }
     ;
 
 MultiplicativeExprNoBF
     : MultiplicativeExprNoBF INFIXL_MULT UnaryExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | UnaryExprNoBF INFIXR_MULT MultiplicativeExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 AdditiveExprNoBF
     : AdditiveExprNoBF INFIXL_PLUS MultiplicativeExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | MultiplicativeExprNoBF INFIXR_PLUS AdditiveExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 ShiftExprNoBF
     : ShiftExprNoBF INFIXL_SHIFT AdditiveExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | AdditiveExprNoBF INFIXR_SHIFT ShiftExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 RelationalExprNoBF
     : RelationalExprNoBF INFIXL_REL ShiftExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | ShiftExprNoBF INFIXR_REL RelationalExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 EqualityExprNoBF
     : EqualityExprNoBF INFIXL_EQ RelationalExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | RelationalExprNoBF INFIXR_EQ EqualityExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 BitwiseANDExprNoBF
     : BitwiseANDExprNoBF INFIXL_BAND EqualityExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | EqualityExprNoBF INFIXR_BAND BitwiseANDExprNoBF
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 BitwiseXORExprNoBF
     : BitwiseXORExprNoBF INFIXL_BXOR BitwiseANDExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | BitwiseANDExprNoBF INFIXR_BXOR BitwiseXORExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 BitwiseORExprNoBF
     : BitwiseORExprNoBF INFIXL_BOR BitwiseXORExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | BitwiseXORExprNoBF INFIXR_BOR BitwiseORExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 LogicalANDExprNoBF
     : LogicalANDExprNoBF INFIXL_AND BitwiseORExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | BitwiseORExprNoBF INFIXR_AND LogicalANDExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 LogicalORExprNoBF
     : LogicalORExprNoBF INFIXL_OR LogicalANDExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | LogicalANDExprNoBF INFIXR_OR LogicalORExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 AssignmentExprNoBF
-    : ConditionalExprNoBF INFIXR_ASSIGN AssignmentExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
-    | AssignmentExprNoBF INFIXL_ASSIGN ConditionalExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    : LeftHandSideExprNoBF INFIXR_ASSIGN AssignmentExpr
+      {
+        $$ = assignOp(yy, $1, $2, $3, @1, @2, @3);
+      }
+    | PREFIX_ASSIGN LeftHandSideExprNoBF
+      {
+        $$ = assignOp(yy, $2, $1, null, @2, @1);
+      }
+    | LeftHandSideExprNoBF POSTFIX_ASSIGN
+      {
+        $$ = assignOp(yy, $1, $2, null, @1, @2);
+      }
     ;
 
 ExprNoBF
     : ExprNoBF INFIXL_COMMA AssignmentExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | AssignmentExprNoBF INFIXR_COMMA ExprNoBF
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 
 RelationalExprNoIn
     : RelationalExprNoIn INFIXL_REL ShiftExprNoIn
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | ShiftExprNoIn INFIXR_REL RelationalExprNoIn
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 EqualityExprNoIn
     : EqualityExprNoIn INFIXL_EQ RelationalExprNoIn
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | RelationalExprNoIn INFIXR_EQ EqualityExprNoIn
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 BitwiseANDExprNoIn
     : BitwiseANDExprNoIn INFIXL_BAND EqualityExprNoIn
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | EqualityExprNoIn INFIXR_BAND BitwiseANDExprNoIn
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 BitwiseXORExprNoIn
     : BitwiseXORExprNoIn INFIXL_BXOR BitwiseANDExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | BitwiseANDExprNoIn INFIXR_BXOR BitwiseXORExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 BitwiseORExprNoIn
     : BitwiseORExprNoIn INFIXL_BOR BitwiseXORExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | BitwiseXORExprNoIn INFIXR_BOR BitwiseORExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 LogicalANDExprNoIn
     : LogicalANDExprNoIn INFIXL_AND BitwiseORExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | BitwiseORExprNoIn INFIXR_AND LogicalANDExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 LogicalORExprNoIn
     : LogicalORExprNoIn INFIXL_OR LogicalANDExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | LogicalANDExprNoIn INFIXR_OR LogicalORExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 AssignmentExprNoIn
-    : ConditionalExprNoIn INFIXR_ASSIGN AssignmentExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
-    | AssignmentExprNoIn INFIXL_ASSIGN ConditionalExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    : LeftHandSideExpr INFIXR_ASSIGN AssignmentExprNoIn
+      {
+        $$ = assignOp(yy, $1, $2, $3, @1, @2, @3);
+      }
+    | PREFIX_ASSIGN LeftHandSideExpr
+      {
+        $$ = assignOp(yy, $2, $1, null, @2, @1);
+      }
+    | LeftHandSideExpr POSTFIX_ASSIGN
+      {
+        $$ = assignOp(yy, $1, $2, null, @1, @2);
+      }
     ;
 
 ExprNoIn
     : ExprNoIn INFIXL_COMMA AssignmentExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | AssignmentExprNoIn INFIXR_COMMA ExprNoIn
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 
 
 MemberExpr
     : MemberExpr INFIXL_DOT PrimaryExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | MemberExpr INFIXL_DOT FunctionExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | PrimaryExpr INFIXR_DOT MemberExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | FunctionExpr INFIXR_DOT MemberExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 PostfixExpr
     : LeftHandSideExpr POSTFIX_OP
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1],yy.loc([@$,@2])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1]),yy.loc([@$,@2])); }
     ;
 
 UnaryExprCommon
     : PREFIX_OP UnaryExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($1),yy.loc(@1)), [$2],yy.loc([@$,@2])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($1),yy.loc(@1)), yy.opArgs($1, [$2]),yy.loc([@$,@2])); }
     ;
 
 MultiplicativeExpr
     : MultiplicativeExpr INFIXL_MULT UnaryExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | UnaryExpr INFIXR_MULT MultiplicativeExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 AdditiveExpr
     : AdditiveExpr INFIXL_PLUS MultiplicativeExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | MultiplicativeExpr INFIXR_PLUS AdditiveExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 ShiftExpr
     : ShiftExpr INFIXL_SHIFT AdditiveExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | AdditiveExpr INFIXR_SHIFT ShiftExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 RelationalExpr
     : RelationalExpr INFIXL_REL ShiftExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | ShiftExpr INFIXR_REL RelationalExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 EqualityExpr
     : EqualityExpr INFIXL_EQ RelationalExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | RelationalExpr INFIXR_EQ EqualityExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 BitwiseANDExpr
     : BitwiseANDExpr INFIXL_BAND EqualityExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | EqualityExpr INFIXR_BAND BitwiseANDExpr
-      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression',yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 BitwiseXORExpr
     : BitwiseXORExpr INFIXL_BXOR BitwiseANDExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | BitwiseANDExpr INFIXR_BXOR BitwiseXORExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 BitwiseORExpr
     : BitwiseORExpr INFIXL_BOR BitwiseXORExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | BitwiseXORExpr INFIXR_BOR BitwiseORExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 LogicalANDExpr
     : LogicalANDExpr INFIXL_AND BitwiseORExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | BitwiseORExpr INFIXR_AND LogicalANDExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 LogicalORExpr
     : LogicalORExpr INFIXL_OR LogicalANDExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | LogicalANDExpr INFIXR_OR LogicalORExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 AssignmentExpr
-    : ConditionalExpr INFIXR_ASSIGN AssignmentExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
-    | AssignmentExpr INFIXL_ASSIGN ConditionalExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+    : LeftHandSideExpr INFIXR_ASSIGN AssignmentExpr
+      {
+        $$ = assignOp(yy, $1, $2, $3, @1, @2, @3);
+      }
+    | PREFIX_ASSIGN LeftHandSideExpr
+      {
+        $$ = assignOp(yy, $2, $1, null, @2, @1);
+      }
+    | LeftHandSideExpr POSTFIX_ASSIGN
+      {
+        $$ = assignOp(yy, $1, $2, null, @1, @2);
+      }
     ;
 
 Expr
     : Expr INFIXL_COMMA AssignmentExpr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     | AssignmentExpr INFIXR_COMMA Expr
-      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), [$1, $3],yy.loc([@$,@3])); }
+      { $$ = yy.Node('CallExpression', yy.Node('Identifier',yy.funForOp($2),yy.loc(@2)), yy.opArgs($2, [$1, $3]),yy.loc([@$,@3])); }
     ;
 
 
 
 InfixDeclaration
-      /* e.g. infixl : * `elem`; */
-    : INFIXL OpPrecedence INFIX_FN ';'
-      { yy.setInfix($3, $3.substr(1,$3.length-2), $2, 'L'); }
-    | INFIXR OpPrecedence INFIX_FN ';'
-      { yy.setInfix($3, $3.substr(1,$3.length-2), $2, 'R'); }
+      /* e.g. infixl * `elem`; */
+    : INFIXL LazyOp OpPrecedence INFIX_FN ';'
+      { yy.setInfix($4, $4.substr(1,$4.length-2), $3, 'L', $2); }
+    | INFIXR LazyOp OpPrecedence INFIX_FN ';'
+      { yy.setInfix($4, $4.substr(1,$4.length-2), $3, 'R', $2); }
 
-      /* e.g. infixl : * (^); */
-    | INFIXL OpPrecedence '(' OPERATOR ')' '=' ExprNoBF ';'
-      { yy.setInfix($4, $7, $2, 'L'); addOp(yy, $4); }
-    | INFIXR OpPrecedence '(' OPERATOR ')' '=' ExprNoBF ';'
-      { yy.setInfix($4, $7, $2, 'R'); addOp(yy, $4); }
+      /* e.g. infixl * (^); */
+    | INFIXL LazyOp OpPrecedence '(' OPERATOR ')' ';'
+      { yy.setInfix($5, null, $3, 'L', $2); }
+    | INFIXR LazyOp OpPrecedence '(' OPERATOR ')' ';'
+      { yy.setInfix($5, null, $3, 'R', $2); }
+    | ASSIGN AssignFixityOp '(' OPERATOR ')' ';'
+      { yy.setAssign($4, null, $2); }
+    | ASSIGN AssignFixityOp LAZY '(' OPERATOR ')' ';'
+      { yy.setAssign($5, null, $2); }
 
-    | POSTFIX '(' OPERATOR ')' '=' ExprNoBF ';'
-      { yy.setPostPrefix($3, $6, true); addOp(yy, $3); }
-    | PREFIX '(' OPERATOR ')' '=' ExprNoBF ';'
-      { yy.setPostPrefix($3, $6); addOp(yy, $3); }
+    | POSTFIX LazyOp '(' OPERATOR ')' ';'
+      { yy.setPostPrefix($4, null, true, $2); }
+    | PREFIX LazyOp '(' OPERATOR ')' ';'
+      { yy.setPostPrefix($4, null, false, $2); }
 
     | DELETEOP OPERATOR ';'
       { deleteOp(yy, $2); }
     ;
 
 OperatorDeclaration
-      /* e.g. infixl : * (**) = exponentiation; */
-    : INFIXL OpPrecedence '(' OPERATOR ')' '=' OperatorDefinition ';'
+      /* e.g. infixl * (**) = exponentiation; */
+    : INFIXL LazyOp OpPrecedence '(' OPERATOR ')' '=' OperatorDefinition ';'
       {
-        var funLabel = '$'+'infixop'+opLabels++;
-        yy.setInfix($4, funLabel, $2, 'L');
+        var funLabel = '$'+'infixop_'+opLabels++;
+        yy.setInfix($5, funLabel, $3, 'L', $2);
+        $$ = yy.Node('VariableDeclaration', "var",
+                [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
+                yy.loc([@1,@9]));
+        addOp(yy, $5);
+      }
+    | INFIXR LazyOp OpPrecedence '(' OPERATOR ')' '=' OperatorDefinition ';'
+      {
+        var funLabel = '$'+'infixop_'+opLabels++;
+        yy.setInfix($5, funLabel, $3, 'R', $2);
+        $$ = yy.Node('VariableDeclaration', "var",
+                [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
+                yy.loc([@1,@9]));
+        addOp(yy, $5);
+      }
+    | POSTFIX LazyOp '(' OPERATOR ')' '=' OperatorDefinition ';'
+      {
+        var funLabel = '$'+'postfixop_'+opLabels++;
+        yy.setPostPrefix($4, funLabel, true, $2);
         $$ = yy.Node('VariableDeclaration', "var",
                 [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
                 yy.loc([@1,@8]));
         addOp(yy, $4);
       }
-    | INFIXR OpPrecedence '(' OPERATOR ')' '=' OperatorDefinition ';'
+    | PREFIX LazyOp '(' OPERATOR ')' '=' OperatorDefinition ';'
       {
-        var funLabel = '$'+'infixop'+opLabels++;
-        yy.setInfix($4, funLabel, $2, 'R');
+        var funLabel = '$'+'prefixop_'+opLabels++;
+        yy.setPostPrefix($4, funLabel, false, $2);
         $$ = yy.Node('VariableDeclaration', "var",
                 [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
                 yy.loc([@1,@8]));
         addOp(yy, $4);
       }
-    | POSTFIX '(' OPERATOR ')' '=' OperatorDefinition ';'
+    | ASSIGN AssignFixityOp '(' OPERATOR ')' '=' OperatorDefinition ';'
       {
-        var funLabel = '$'+'postfixop'+opLabels++;
-        yy.setPostPrefix($3, funLabel, true);
+        var funLabel = '$'+'assignop_'+opLabels++;
+        yy.setAssign($4, funLabel, $2);
         $$ = yy.Node('VariableDeclaration', "var",
                 [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
-                yy.loc([@1,@7]));
-        addOp(yy, $3);
+                yy.loc([@1,@8]));
+        addOp(yy, $4);
       }
-    | PREFIX '(' OPERATOR ')' '=' OperatorDefinition ';'
+    | ASSIGN AssignFixityOp LAZY '(' OPERATOR ')' '=' OperatorDefinition ';'
       {
-        var funLabel = '$'+'prefixop'+opLabels++;
-        yy.setPostPrefix($3, funLabel);
+        var funLabel = '$'+'assignop_'+opLabels++;
+        yy.setAssign($5, funLabel, $2, $3);
         $$ = yy.Node('VariableDeclaration', "var",
                 [yy.Node('VariableDeclarator', yy.Node('Identifier', funLabel, yy.loc(@1)), $OperatorDefinition)],
-                yy.loc([@1,@7]));
-        addOp(yy, $3);
+                yy.loc([@1,@9]));
+        addOp(yy, $5);
       }
+    ;
+
+AssignFixityOp
+    : INFIXR
+    | POSTFIX
+    | PREFIX
+    |
+    ;
+
+LazyOp
+    : LAZY
+    |
     ;
 
 OperatorDefinition
@@ -1602,6 +1660,7 @@ OperatorDefinition
     | FUNCTION '(' FormalParameterList ')' Block
       { $$ = yy.Node('FunctionExpression', null,
            $FormalParameterList, $Block, false, false, yy.loc([@$,@5])); }
+    | ExprNoBF
     ;
 
 OpPrecedence
@@ -1624,20 +1683,20 @@ InfixOp
     | '*'
     | '%'
     | '<'
-    | '<<'
-    | '<='
     | '>'
-    | '>='
-    | '>>'
-    | '>>>'
+    | GE
+    | LE
     | '&'
     | '/'
-    | '=='
-    | '!='
-    | '==='
-    | '!=='
+    | EQEQ
+    | NE
+    | STREQ
+    | STRNEQ
     | '.'
-    | '='
+    ;
+
+AssignOp
+    : '='
     | PLUSEQUAL
     | MINUSEQUAL
     | MULTEQUAL
@@ -1651,12 +1710,111 @@ InfixOp
     | URSHIFTEQUAL
     ;
 
+PrimaryExprNoBrace
+    : '(' CustomOp ')'
+      { $$ = yy.Node('Identifier',yy.funForOp($2), yy.loc([@$,@3])); }
+    ;
+
+CustomOp
+    : CustomInfixOp
+    | POSTFIX_OP
+    | PREFIX_OP
+    | POSTFIX_ASSIGN
+    | PREFIX_ASSIGN
+    ;
+
+CustomInfixOp
+    : INFIXR_COMMA
+    | INFIXL_COMMA
+    | INFIXR_ASSIGN
+    | INFIXR_OR
+    | INFIXL_OR
+    | INFIXR_AND
+    | INFIXL_AND
+    | INFIXR_BOR
+    | INFIXL_BOR
+    | INFIXR_BXOR
+    | INFIXL_BXOR
+    | INFIXR_BAND
+    | INFIXL_BAND
+    | INFIXR_EQ
+    | INFIXL_EQ
+    | INFIXR_REL
+    | INFIXL_REL
+    | INFIXR_SHIFT
+    | INFIXL_SHIFT
+    | INFIXR_PLUS
+    | INFIXL_PLUS
+    | INFIXR_MULT
+    | INFIXL_MULT
+    | INFIXR_DOT
+    | INFIXL_DOT
+    | INFIX_FN
+    ;
 %%
 
-var opStack = [];
+var opStack        = [];
 var opPointerStack = [];
-var opPointer = 0;
-var opLabels = 0;
+var opPointer      = 0;
+var opLabels       = 0;
+var tempLabels     = 0;
+
+// temporary var name
+function temp (yy, loc) {
+  return yy.Node('Identifier', "$temp_" + (tempLabels++), loc);
+}
+
+// immediately invoked function expression
+function iife (yy, expr, params, args) {
+  return yy.Node('CallExpression',
+      yy.Node('FunctionExpression', null, params || [],
+        yy.Node('BlockStatement',
+          [yy.Node('ReturnStatement', expr, expr.loc)]
+          , expr.loc),
+        false, false, expr.loc)
+    , args || [], expr.loc);
+}
+
+function assignOp (yy, obj, op, val, obj_, op_, val_) {
+
+  if (!val_) {
+    val_ = op_;
+  }
+  // assign exprs are transformed into:
+  // LHS op EXPR -> LHS = op(LSH, EXPR)
+
+  // if the lefthandside is a member expression, e.g. obj[prop], wrap in a funexpr so
+  // the obj + expr isn't evaluated twice:
+  // obj[prop] op EXPR -> (function (tmp1, tmp2) { tmp1[tmp2] = tmp1[tmp2] op EXPR; })(obj, prop)
+  if (obj.object) {
+    var t_obj    = temp(yy);
+    var t_prop   = temp(yy);
+    var object   = obj.object;
+    var prop     = obj.property;
+    var computed = obj.computed;
+    obj.computed = true;
+    obj.object   = t_obj;
+    obj.property = t_prop;
+
+    var expr = yy.Node('AssignmentExpression', '=', obj,
+      yy.Node('CallExpression', yy.Node('Identifier', yy.funForOp(op), yy.loc(op_)), yy.opArgs(op, val ? [obj, val] : [obj]), yy.loc(val_)),
+      yy.loc([obj_,val_]));
+    return iife(yy, expr, [t_obj, t_prop], [object, computed ? prop : yy.Node('Literal', prop.name, prop.loc)]);
+  } else {
+    return yy.Node('AssignmentExpression', '=', obj,
+      yy.Node('CallExpression', yy.Node('Identifier', yy.funForOp(op), yy.loc(op_)), yy.opArgs(op, val ? [obj, val] : [obj]), yy.loc(val_)),
+      yy.loc([obj_,val_]));
+  }
+}
+
+/*// immediately invoked function expression*/
+/*function iife (yy, expr, params, args) {*/
+  /*return yy.Node('CallExpression',*/
+      /*yy.Node('FunctionExpression', null, params || [],*/
+        /*yy.Node('ReturnStatement', expr, expr.loc),*/
+        /*false, false, expr.loc);*/
+    /*, args || [], expr.loc);*/
+/*}*/
 
 // store the number of definied operators
 function enterScope (yy) {

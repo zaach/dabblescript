@@ -1,0 +1,68 @@
+var assert = require('assert');
+
+// proto assignment
+infixl 9 (<|) = function (a, b) {
+  a.__proto__ = b;
+  return a;
+};
+
+var obj = {who: "obj"};
+var proto = {name: function(){ return "my name is "+this.who }};
+var result = proto <| obj;
+
+assert.equal(result.name(), "my name is obj");
+
+
+// existential operator
+// http://wiki.ecmascript.org/doku.php?id=strawman:existential_operator
+infixl 9 (?.) = function (a, b) {
+  return (a || {})[b];
+};
+
+assert.strictEqual(undefined?."a"?."b", undefined);
+
+// a mix of batch assignment/object extensions operators
+// http://wiki.ecmascript.org/doku.php?id=strawman:batch_assignment_operator
+// http://wiki.ecmascript.org/doku.php?id=strawman:object_extension_literals
+infixl . (.=) = function (a, b) {
+  Object.keys(b).forEach(function(k) { a[k] = b[k] });
+  return a;
+};
+
+assert.deepEqual({}.={foo: 'bar'}.={yes: true}, {foo: 'bar', yes: true});
+
+infixl . (.:=) = function (a, b) {
+  Object.getOwnPropertyNames(b).forEach(function(k) {
+    Object.defineProperty(a, k, Object.getOwnPropertyDescriptor(b, k));
+  });
+  return a;
+};
+
+assert.deepEqual({}.:={foo: 'bar'}.:={yes: true}, {foo: 'bar', yes: true});
+
+// default operator
+// http://wiki.ecmascript.org/doku.php?id=strawman:default_operator
+infixl lazy || (??) = function (a, b) {
+  var val = a();
+  return val !== undefined ? val : b();
+};
+
+var lazy;
+assert.equal(lazy ?? 42, 42);
+lazy = 0;
+assert.equal(lazy ?? ++lazy, 0);
+
+// default assignment operator
+assign lazy (??=) = (??);
+
+var val;
+val ??= 42;
+val ??= 99;
+assert.equal(val, 42);
+
+// http://wiki.ecmascript.org/doku.php?id=strawman:has_operator
+infixl 9 (has) = function (a, b) {
+  return Object.prototype.hasOwnProperty.call(a, b);
+};
+
+assert.ok({foo: 42} has "foo");
