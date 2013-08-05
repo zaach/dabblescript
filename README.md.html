@@ -1,0 +1,178 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<title>~/repos/dabble/README.md.html</title>
+<meta name="Generator" content="Vim/7.3">
+<meta name="plugin-version" content="vim7.3_v10">
+<meta name="syntax" content="dabblescript">
+<meta name="settings" content="use_css,pre_wrap,expand_tabs">
+<style type="text/css">
+<!--
+pre { white-space: pre-wrap; font-family: monospace; color: #e7e3d2; background-color: #191919; }
+body { font-family: monospace; color: #e7e3d2; background-color: #191919; }
+.Type { color: #ffffb6; }
+.Constant { color: #99cc99; }
+.Conditional { color: #6699cc; }
+.Identifier { color: #c6c5fe; }
+.Keyword { color: #96cbfe; }
+.String { color: #a8ff60; }
+.Title { color: #f6f3e8; font-weight: bold; }
+.Function { color: #ffd2a7; }
+.Operator { color: #ffffff; }
+.Number { color: #ff73fd; }
+.Special { color: #e18964; }
+.Comment { color: #7c7c7c; }
+.Statement { color: #6699cc; }
+-->
+</style>
+</head>
+<body>
+<pre>
+# DabbleScript
+
+Dabble <span class="Statement">with</span><span class=""> JavaScript syntax.</span>
+
+<span class="Comment">// define an &quot;is&quot; operator</span>
+<span class="Special">infixl</span> <span class="Number">8</span><span class=""> </span><span class="Operator">(</span><span class="">is</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> </span><span class="Function">function</span><span class="Title"> (a, b)</span><span class=""> </span><span class="Function">{</span>
+  <span class="Statement">return</span><span class=""> a </span><span class="Operator">===</span><span class=""> b</span><span class="Statement">;</span>
+<span class="Function">}</span><span class="Statement">;</span>
+
+assert.ok<span class="Operator">(</span><span class="String">&quot;everything&quot;</span><span class=""> is </span><span class="String">&quot;everything&quot;</span><span class="Operator">)</span><span class="Statement">;</span>
+
+## Install
+
+$ npm install dabble
+
+Or clone from git and run `npm install` and then `make`.
+
+## Use
+
+Translate dabble scripts:
+
+$ dabble exaple/es-next-operators.dabble
+
+## Operator Declarations
+
+Dabblescript lets you define <span class="Operator">new</span><span class=""> operators or overwrite existing ones, expressing them as functions. The operators can be infix, </span><span class="Special">postfix</span><span class="">, </span><span class="Special">prefix</span><span class="">, and they can update a reference or simply </span><span class="Statement">return</span><span class=""> a value. Operators can also be `lazy`, to support </span><span class="Keyword">short</span><span class="">-circuiting. Lazy operators will have their </span><span class="Identifier">arguments</span><span class=""> wrapped </span><span class="Statement">in</span><span class=""> thunks, which can evaluated </span><span class="Statement">in</span><span class=""> the operator definition. Precedence determines the order of operations </span><span class="Operator">(</span><span class="">detailed below</span><span class="Operator">)</span><span class="">, and can be a number from </span><span class="Number">1</span><span class=""> - </span><span class="Number">16</span><span class=""> or a symbol of a builtin operator </span><span class="Operator">(</span><span class="">to copy that operators precedence</span><span class="Operator">)</span><span class="">.</span>
+
+Dabblescript modifies the lexer during compile time to recognize <span class="Operator">new</span><span class=""> operators and replaces uses of them </span><span class="Statement">with</span><span class=""> a call to the </span><span class="Function">function</span><span class=""> you define </span><span class="Statement">for</span><span class=""> them. Operators are lexically scoped, but without hoisting.</span>
+
+### <span class="Special">infixl</span><span class=""> `</span><span class="Function">[</span><span class="">lazy</span><span class="Function">]</span><span class="">` `</span><span class="Operator">&lt;</span><span class="">precedence</span><span class="Operator">&gt;</span><span class="">` </span><span class="Operator">(</span><span class="">`op`</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> `expr`</span><span class="Statement">;</span>
+
+This creates an infix, left-associative operator. Most JavaScript operators are left-associative. Example:
+
+<span class="Comment">// strongly-typed addition operator</span>
+<span class="Special">infixl</span> <span class="Number">9</span><span class=""> </span><span class="Operator">(</span><span class="">+</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> </span><span class="Function">function</span><span class="Title"> (a, b)</span><span class=""> </span><span class="Function">{</span>
+  <span class="Conditional">if</span><span class=""> </span><span class="Operator">(</span><span class="Operator">typeof</span><span class=""> a </span><span class="Operator">!==</span><span class=""> </span><span class="String">'number'</span><span class=""> </span><span class="Constant">||</span><span class=""> </span><span class="Operator">typeof</span><span class=""> b </span><span class="Operator">!==</span><span class=""> </span><span class="String">'number'</span><span class="Operator">)</span><span class=""> </span><span class="Function">{</span>
+    <span class="Special">throw</span><span class=""> </span><span class="Operator">new</span><span class=""> </span><span class="Special">Error</span><span class="Operator">(</span><span class="String">&quot;TypeError: operands of + must be numbers&quot;</span><span class="Operator">)</span><span class="Statement">;</span>
+  <span class="Function">}</span>
+  <span class="Statement">return</span><span class=""> a + b</span><span class="Statement">;</span>
+<span class="Function">}</span><span class="Statement">;</span>
+
+### <span class="Special">infixr</span><span class=""> `</span><span class="Function">[</span><span class="">lazy</span><span class="Function">]</span><span class="">` `</span><span class="Operator">&lt;</span><span class="">precedence</span><span class="Operator">&gt;</span><span class="">` </span><span class="Operator">(</span><span class="">`op`</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> `expr`</span><span class="Statement">;</span>
+
+This creates an infix, right-associative operator. Example:
+
+<span class="Comment">// cons operator</span>
+<span class="Special">infixr</span> <span class="Number">9</span><span class=""> </span><span class="Operator">(</span><span class="">::</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> </span><span class="Function">function</span><span class="Title"> (a, b)</span><span class=""> </span><span class="Function">{</span>
+  <span class="Statement">return</span><span class=""> </span><span class="Function">[</span><span class="">a, b</span><span class="Function">]</span><span class="Statement">;</span>
+<span class="Function">}</span><span class="Statement">;</span>
+
+### <span class="Special">prefix</span><span class=""> `</span><span class="Function">[</span><span class="">lazy</span><span class="Function">]</span><span class="">` </span><span class="Operator">(</span><span class="">`op`</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> `expr`</span><span class="Statement">;</span>
+
+This creates a <span class="Special">prefix</span><span class=""> operator </span><span class="Operator">(</span><span class="">e.g. `!` or `</span><span class="Identifier">void</span><span class="">`</span><span class="Operator">)</span><span class="">. Example:</span>
+
+<span class="Special">prefix</span> <span class="Operator">(</span><span class="">@</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> </span><span class="Function">function</span><span class="Title"> (a)</span><span class=""> </span><span class="Function">{</span>
+  <span class="Statement">return</span><span class=""> </span><span class="Special">Date</span><span class="">.parse</span><span class="Operator">(</span><span class="">a</span><span class="Operator">)</span><span class="Statement">;</span>
+<span class="Function">}</span><span class="Statement">;</span>
+
+### <span class="Special">postfix</span><span class=""> `</span><span class="Function">[</span><span class="">lazy</span><span class="Function">]</span><span class="">` </span><span class="Operator">(</span><span class="">`op`</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> `expr`</span><span class="Statement">;</span>
+
+This creates a <span class="Special">postfix</span><span class=""> operator </span><span class="Operator">(</span><span class="">e.g. `</span><span class="Operator">++</span><span class="">` or `</span><span class="Operator">--</span><span class="">`</span><span class="Operator">)</span><span class="">. Example:</span>
+
+<span class="Special">postfix</span> <span class="Operator">(</span><span class="">?</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> </span><span class="Function">function</span><span class="Title"> (a)</span><span class=""> </span><span class="Function">{</span>
+  <span class="Statement">return</span><span class=""> !!a</span><span class="Statement">;</span>
+<span class="Function">}</span><span class="Statement">;</span>
+
+### <span class="Special">assign</span><span class=""> `</span><span class="Function">[</span><span class="Special">infixr</span><span class="">|</span><span class="Special">prefix</span><span class="">|</span><span class="Special">postfix</span><span class="Function">]</span><span class="">` </span><span class="Operator">(</span><span class="">`op`</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> `expr`</span><span class="Statement">;</span>
+
+This creates an assignment operator <span class="Statement">with</span><span class=""> a fixity that is either `</span><span class="Special">infixr</span><span class="">`, `</span><span class="Special">prefix</span><span class="">`, or `</span><span class="Special">postfix</span><span class="">`. If you omit the fixity it will </span><span class="Statement">default</span><span class=""> to `</span><span class="Special">infixr</span><span class="">`. Prefix and </span><span class="Special">postfix</span><span class=""> assignment operators are neat because they allow you to create operators such as pre-increment or pre-decrement.</span>
+
+Assign operators roughly translate as `lhs op val -<span class="Operator">&gt;</span><span class=""> lhs </span><span class="Operator">=</span><span class=""> op</span><span class="Operator">(</span><span class="">lhs, val</span><span class="Operator">)</span><span class="">`.</span>
+
+Examples:
+
+<span class="Comment">// lazy infixr assignment</span>
+<span class="Special">assign</span> lazy <span class="Operator">(</span><span class="">??</span><span class="Operator">=</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> </span><span class="Function">function</span><span class="Title"> (a, b)</span><span class=""> </span><span class="Function">{</span>
+  <span class="Identifier">var</span><span class=""> val </span><span class="Operator">=</span><span class=""> a</span><span class="Operator">()</span><span class="Statement">;</span>
+  <span class="Statement">return</span><span class=""> val </span><span class="Operator">!==</span><span class=""> </span><span class="Type">undefined</span><span class=""> ? val : b</span><span class="Operator">()</span><span class="Statement">;</span>
+<span class="Function">}</span><span class="Statement">;</span>
+
+<span class="Comment">// prefix assignment</span>
+<span class="Special">assign</span> <span class="Special">prefix</span><span class=""> </span><span class="Operator">(</span><span class="Operator">++</span><span class="">+</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> </span><span class="Function">function</span><span class="Title"> (a)</span><span class=""> </span><span class="Function">{</span>
+  <span class="Statement">return</span><span class=""> a + </span><span class="Number">2</span><span class="Statement">;</span>
+<span class="Function">}</span><span class="Statement">;</span>
+
+## Precedence
+Precedence can be declared <span class="Statement">for</span><span class=""> infix operators, though pre/</span><span class="Special">postfix</span><span class=""> and assignment operators have a designated precedence. From lowest to highest precedence:</span>
+
+<span class="Number">1</span>  <span class="Statement">,</span>
+<span class="Number">2</span>         <span class="Comment">// reserved for assignment operators; use assign declaration</span>
+<span class="Number">3</span>  <span class="Constant">||</span>
+<span class="Number">4</span>  <span class="Constant">&amp;&amp;</span>
+<span class="Number">5</span>  |
+<span class="Number">6</span>  ^
+<span class="Number">7</span>  &amp;
+<span class="Number">8</span>  <span class="Operator">==</span><span class=""> </span><span class="Operator">!=</span><span class=""> </span><span class="Operator">===</span><span class=""> </span><span class="Operator">!==</span>
+<span class="Number">9</span>  <span class="Operator">&lt;</span><span class=""> </span><span class="Operator">&lt;=</span><span class=""> </span><span class="Operator">&gt;</span><span class=""> </span><span class="Operator">&gt;=</span>
+<span class="Number">10</span> <span class="Operator">&gt;&gt;</span><span class=""> </span><span class="Operator">&gt;&gt;&gt;</span><span class=""> </span><span class="Operator">&lt;&lt;</span>
+<span class="Number">11</span> + -
+<span class="Number">12</span> * % /
+<span class="Number">14</span>        <span class="Comment">// reserved for unary; use prefix declaration</span>
+<span class="Number">15</span>        <span class="Comment">// reserved for postfix; use postfix declaration</span>
+<span class="Number">16</span> .
+
+## Semantics
+
+Operators adhere roughly to lexical scope <span class="Operator">--</span><span class=""> they take affect from the point after they are declared to the point the script or </span><span class="Function">function</span><span class=""> they were declared </span><span class="Statement">in</span><span class=""> ends. For an example of lexical scoping:</span>
+
+<span class="Operator">(</span><span class="Function">function</span><span class="Title"> ()</span> <span class="Function">{</span>
+  assert.equal<span class="Operator">(</span><span class="Number">1</span><span class=""> + </span><span class="Number">2</span><span class="">, </span><span class="Number">3</span><span class="Operator">)</span><span class="Statement">;</span>
+
+  <span class="Special">infixl</span><span class=""> </span><span class="Number">9</span><span class=""> </span><span class="Operator">(</span><span class="">+</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> </span><span class="Function">function</span><span class="Title"> (a, b)</span><span class=""> </span><span class="Function">{</span>
+    <span class="Statement">return</span><span class=""> a * b</span><span class="Statement">;</span>
+  <span class="Function">}</span><span class="Statement">;</span>
+
+  assert.equal<span class="Operator">(</span><span class="Number">1</span><span class=""> + </span><span class="Number">2</span><span class="">, </span><span class="Number">2</span><span class="Operator">)</span><span class="Statement">;</span>
+<span class="Function">}</span><span class="Operator">)()</span><span class="Statement">;</span>
+
+assert.equal<span class="Operator">(</span><span class="Number">1</span><span class=""> + </span><span class="Number">2</span><span class="">, </span><span class="Number">3</span><span class="Operator">)</span><span class="Statement">;</span>
+
+The user defined `+` operator only affects the code <span class="Statement">in</span><span class=""> the </span><span class="Function">function</span><span class=""> it was declared </span><span class="Statement">in</span><span class="">, after it is declared.</span>
+
+### <span class="Identifier">deleteop</span>
+
+You can <span class="Operator">delete</span><span class=""> operators using the `</span><span class="Identifier">deleteop</span><span class="">` statement, e.g. `</span><span class="Identifier">deleteop</span><span class=""> myop;`. Any further occurances of the operators symbol after that point will be interpreted as </span><span class="Conditional">if</span><span class=""> the operator had not been deblared. It will </span><span class="Operator">delete</span><span class=""> the operator </span><span class="Statement">in</span><span class=""> the most recent scoped </span><span class="Conditional">if</span><span class=""> operators are being shadowed.</span>
+
+### Refencing an Operator
+
+You can gain a reference to an operator by using the `<span class="Operator">(</span><span class="">op</span><span class="Operator">)</span><span class="">` expression. This syntax is inspired by *sections* </span><span class="Statement">in</span><span class=""> Haskell, but without partial application support. Example:</span>
+
+<span class="Special">infixl</span> * <span class="Operator">(</span><span class="">^</span><span class="Operator">)</span><span class=""> </span><span class="Operator">=</span><span class=""> </span><span class="Function">function</span><span class="Title"> (a, b)</span><span class=""> </span><span class="Function">{</span>
+  <span class="Statement">return</span><span class=""> </span><span class="Special">Math</span><span class="">.pow</span><span class="Operator">(</span><span class="">a, b</span><span class="Operator">)</span><span class="Statement">;</span>
+<span class="Function">}</span><span class="Statement">;</span>
+<span class="Identifier">var</span> pow <span class="Operator">=</span><span class=""> </span><span class="Operator">(</span><span class="">^</span><span class="Operator">)</span><span class="Statement">;</span>
+assert.equal<span class="Operator">(</span><span class="">pow</span><span class="Operator">(</span><span class="Number">2</span><span class="">, </span><span class="Number">10</span><span class="Operator">)</span><span class="">, </span><span class="Number">1024</span><span class="Operator">)</span><span class="Statement">;</span>
+
+### Other notes
+
+* Operators are not restricted <span class="Statement">in</span><span class=""> what characters they can contain, besides whitespace. You can include a `</span><span class="Operator">)</span><span class="">` by escaping it </span><span class="Statement">with</span><span class=""> `</span><span class="Operator">)</span><span class="">`.</span>
+* You can define an operator using a reference to a <span class="Function">function</span><span class=""> instead of a </span><span class="Function">function</span><span class=""> expression. E.g.:</span>
+
+### Gotchas
+* The lexer takes the longest possible match <span class="Statement">for</span><span class=""> a token, so </span><span class="Conditional">if</span><span class=""> your operator is a valid part of another token, it should have space seperating it.</span>
+* No eval support.
+</pre>
+</body>
+</html>

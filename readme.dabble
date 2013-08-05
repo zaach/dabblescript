@@ -1,0 +1,92 @@
+    var assert = require('assert');
+
+    // define an "is" operator
+    infixl 8 (is) = function (a, b) {
+      return a === b;
+    };
+
+    assert.ok("everything" is "everything");
+
+    // strongly-typed addition operator
+    infixl 9 (+) = function (a, b) {
+      if (typeof a !== 'number' || typeof b !== 'number') {
+        throw new Error("TypeError: operands of + must be numbers");
+      }
+      return a + b;
+    };
+
+    assert['throws'](function () { 42 + "oh hai"; });
+
+
+
+    // cons operator
+    infixr 9 (::) = function (a, b) {
+      return [a, b];
+    };
+
+    assert.deepEqual(1 :: 2 :: 3, [1, [2, [3]]]);
+
+
+    prefix (not) = function (a) {
+      return !a;
+    };
+
+    assert.equal(not false, true);
+
+
+    // existential
+    postfix (?) = function (a) {
+      return typeof a !== 'undefined' && a !== null;
+    };
+
+    var hasName = {}.name?;
+    assert.equal(hasName, false);
+
+
+    // lazy infixr assignment
+    assign lazy (??=) = function (a, b) {
+      var val = a();
+      return val !== undefined ? val : b();
+    };
+
+    // prefix assignment
+    assign prefix (+++) = function (a) {
+      return a + 2;
+    };
+
+    (function () {
+      assert.equal(1 + 2, 3);
+
+      infixl 9 (+) = function (a, b) {
+        return a * b;
+      };
+
+      assert.equal(1 + 2, 2);
+    })();
+
+    assert.equal(1 + 2, 3);
+
+The user defined `+` operator only affects the code in the function it was declared in, after it is declared.
+
+### deleteop
+
+You can delete operators using the `deleteop` statement, e.g. `deleteop myop;`. Any further occurances of the operators symbol after that point will be interpreted as if the operator had not been deblared. It will delete the operator in the most recent scoped if operators are being shadowed.
+
+### Refencing an Operator
+
+You can gain a reference to an operator by using the `(op)` expression. This syntax is inspired by *sections* in Haskell, but without partial application support. Example:
+
+    infixl * (^) = function (a, b) {
+      return Math.pow(a, b);
+    };
+    var pow = (^);
+    assert.equal(pow(2, 10), 1024);
+
+### Other notes
+
+* Operators are not restricted in what characters they can contain, besides whitespace. You can include a `)` by escaping it with `)`.
+* You can define an operator using a reference to a function instead of a function expression. E.g.:
+
+### Gotchas
+* The lexer takes the longest possible match for a token, so if your operator is a valid part of another token, it should have space seperating it.
+* No eval support.

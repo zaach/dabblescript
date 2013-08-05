@@ -29,7 +29,8 @@
   },
   "devDependencies": {
     "jison": "0.3.x",
-    "uglify-js": "*"
+    "uglify-js": "*",
+    "browserify": "1.14.x"
   },
   "scripts": {
     "test": "node test/all-tests.js"

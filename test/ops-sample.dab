@@ -141,6 +141,7 @@ assert.ok(obj.power_level > 9000);
 assign prefix (+++) = function (a) {
   return a + 2;
 };
+
 var val2 = 0;
 +++val2;
 +++obj.power_level;

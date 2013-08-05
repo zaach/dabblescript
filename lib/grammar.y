@@ -1204,6 +1204,7 @@ Program
         });
         prog.tokens = yy.tokens;
         prog.range = [0,0];
+        resetParse();
         return prog;
       }
     | ScopeSourceElements
@@ -1212,6 +1213,7 @@ Program
         if (yy.tokens.length) prog.tokens = yy.tokens;
         if (yy.comments.length) prog.comments = yy.comments;
         if (prog.loc) prog.range = rangeBlock($1);
+        resetParse();
         return prog;
       }
     ;
@@ -1753,11 +1755,17 @@ CustomInfixOp
     ;
 %%
 
-var opStack        = [];
-var opPointerStack = [];
-var opPointer      = 0;
-var opLabels       = 0;
-var tempLabels     = 0;
+var opStack, opPointerStack, opPointer, opLabels, tempLabels;
+
+resetParse();
+
+function resetParse () {
+  opStack        = [];
+  opPointerStack = [];
+  opPointer      = 0;
+  opLabels       = 0;
+  tempLabels     = 0;
+}
 
 // temporary var name
 function temp (yy, loc) {

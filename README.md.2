@@ -1,0 +1,76 @@
+# ghilliescript
+
+ghilliescript was inspired by Haskell's ability to let you [define new operators](http://www.haskell.org/tutorial/functions.html), which are simply functions with infix notation. In a nutshell, ghilliescript lets you:
+
+ * Use any function as an infix operator
+ * Define new infix, prefix, or postfix operators
+ * Redefine existing operators
+ * Shoot yourself in the foot
+
+
+Alright, let's get into it.
+
+## demonstration
+
+Here's an example of overwriting the `+` operator. Let's make it strongly typed:
+
+    infixl 9 (+) = function (a, b) {
+      if (typeof a !== 'number' || typeof b !== 'number') {
+        throw new Error("TypeError: operands of + must be numbers");
+      }
+      return a + b;
+    };
+
+But now we can't concatenate strings! So let's define a new string concatenation operator:
+
+    infixl 9 (::) = function (a, b) {
+      if (typeof a !== 'string' || typeof b !== 'string') {
+        throw new Error("TypeError: operands of :: must be strings");
+      }
+      return a + b;
+    };
+
+Hrmm. If we redefined the `+` operator, what happens to `return a + b` in the definition of `::`? It would use our redefined (strongly typed) operator and not the native one! So we should make sure to define `::` before `+` if we want the native behavior of `+`:
+
+    infixl 9 (::) = function (a, b) {
+      if (typeof a !== 'string' || typeof b !== 'string') {
+        throw new Error("TypeError: operands of :: must be strings");
+      }
+      return a + b;
+    };
+
+    infixl 9 (+) = function (a, b) {
+      if (typeof a !== 'number' || typeof b !== 'number') {
+        throw new Error("TypeError: operands of + must be numbers");
+      }
+      return a + b;
+    };
+
+All better. But let's backup and explain the syntax.
+
+## munitions
+
+You can use any function
+
+// No coersion here!
+// Note: if you overwrite an existing operator as infix, it can no longer be used as pre/postfix (e.g. +obj)
+// You can assign a function to the operator from a module
+// Infix functions for free, using backticks
+// Scoping operator declarations
+// shadowing operators
+// explicitly deleting operators
+//
+// This is where it gets crazy: operators can be valid identifiers. Operators can be anything except whitespace, in fact.
+//
+// But wait, there's more! (oh no...)
+// You can define prefix and postfix operators too.
+//
+// Gotchas
+// If you use a valid identifier as an operator, it cannot hug other valid identifiers.
+// Does not work with eval -- compilation happens statically.
+// Operators can either be prefix, infixl, infixr, or postfix. 
+
+
+License
+=======
+MIT X Licensed.
